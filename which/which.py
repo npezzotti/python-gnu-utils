@@ -16,22 +16,19 @@ def get_path_dirs():
 def main(args):
     dirs = get_path_dirs()
 
-    result = ''
+    results = []
     for dir in dirs:
         for file in find_files(args.program, dir):
-            if args.a and not args.s:
-                print(file)
-            else:
-                result = file
-                break
-        if result:
-            break
+            results.append(file)
 
-    if not result:
+    if not results:
         sys.exit(1)
     
-    if not args.s:
-        print(result)
+    if args.a and not args.s:
+        for res in results:
+            print(res)
+    elif not args.s:
+        print(results[0])
     
     sys.exit(0)
 
