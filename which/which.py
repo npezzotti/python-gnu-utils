@@ -2,11 +2,12 @@ import os
 import sys
 
 
-def find_files(name, start='.'):
-    for relpath, _, files in os.walk(start):
-        if name in files:
-            path = os.path.join(relpath, name)
-            yield os.path.normpath(os.path.abspath(path))
+def find_files(name, dir='.'):
+    with os.scandir(dir) as files:
+        for file in files:
+            if file.name == name:
+                path = os.path.join(dir, name)
+                yield os.path.normpath(os.path.abspath(path))
 
 def get_path_dirs():
     path = os.getenv('PATH')
