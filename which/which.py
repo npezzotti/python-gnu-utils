@@ -6,8 +6,7 @@ def find_files(name, dir='.'):
     with os.scandir(dir) as files:
         for file in files:
             if file.name == name and file.is_file():
-                path = os.path.join(dir, name)
-                yield os.path.normpath(os.path.abspath(path))
+                yield file.path
 
 def get_path_dirs():
     path = os.getenv('PATH')
