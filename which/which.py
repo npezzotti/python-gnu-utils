@@ -2,45 +2,44 @@ import os
 import sys
 
 
-def find_files(name, dir='.'):
-    with os.scandir(dir) as files:
-        for file in files:
-            if file.name == name and file.is_file():
-                yield file.path
-
-def get_path_dirs():
-    path = os.getenv('PATH')
-    
-    return path.split(';') if sys.platform.startswith('win32') else path.split(':')
-
 def main(args):
-    dirs = get_path_dirs()
+    path = os.getenv('PATH')
+    dirs = path.split(';') if sys.platform.startswith('win32') else path.split(':')
 
-    results = []
+    results = { prog: [] for prog in args.program }
     for dir in dirs:
-        for file in find_files(args.program, dir):
-            results.append(file)
+        with os.scandir(dir) as files:
+            for file in files:
+                if file.name in results and file.is_file():
+                    results[file.name].append(file.path)
 
-    if not results:
-        sys.exit(1)
-    
-    if args.a and not args.s:
-        for res in results:
-            print(res)
-    elif not args.s:
-        print(results[0])
-    
-    sys.exit(0)
+    exit_status = 0
+    for _, files in results.items():
+        if not files:
+            exit_status = 1
+            continue
+
+        if args.a and not args.s:
+            for f in files:
+                print(f)
+        elif not args.s:
+            print(files[0])
+
+    sys.exit(exit_status)
 
 if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='locate a program file in the user\'s path')
+        prog=os.path.basename(__file__),
+        description="Locate a program file in the user's path",
+    )
 
     parser.add_argument(
         'program',
-        help='Program to search for'
+        nargs='+',
+        type=str,
+        help='List of command names'
     )
     parser.add_argument(
         '-a', 
